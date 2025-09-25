@@ -17,7 +17,6 @@ connect to container postgres and launch these commands :
     
     CREATE DATABASE myapp;
     CREATE USER myapp_user WITH ENCRYPTED PASSWORD 'mypass';
-    # CREATE SCHEMA myapp_user; # Not needed for Django as it uses the public schema
     GRANT ALL PRIVILEGES ON DATABASE myapp TO myapp_user;
     
     \c myapp;
