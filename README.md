@@ -25,6 +25,7 @@ connect to container postgres and launch these commands :
 
 connect to container backend and launch these commands :
 
+```bash
 cd <path-to-django-project>
 
 python [manage.py](http://manage.py) migrate
@@ -32,6 +33,8 @@ python [manage.py](http://manage.py) migrate
 python [manage.py](http://manage.py) createsuperuser
 
 python [manage.py](http://manage.py) runserver 0.0.0.0:8000
+
+```
 
 Go to your browser and connect to [localhost:8000](http://localhost:8000) and [localhost:8000/admin](http://localhost:8000/admin) to verify the result.
 
