@@ -1,0 +1,86 @@
+
+services:
+  db:
+    image: postgres:16.3-bullseye 
+    container_name: Database
+    environment:
+      POSTGRES_DB: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    volumes:
+      # - /mnt/nfs/automationstorage/AT/users/SEA/bench-app/data:/var/lib/postgresql/data
+      # - ./dataset:/docker-entrypoint-initdb.d
+      - ./dataset:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    # networks:
+    #   - DB
+  # metabase:
+  #   image: metabase/metabase:latest
+  #   depends_on:
+  #     - db
+  #   ports:
+  #     - 3000:3000
+  #   networks:
+  #     - DB
+  backend:
+    container_name: myapp_backend
+    # user: ${CURRENT_UID}
+    build: ./backend
+    depends_on:
+      - db
+    env_file: .env_dev #to be commented if not using .env_dev file
+    command: sh -c "cd /empty-app/backend/ ; python manage.py runserver 0.0.0.0:8000"
+    # command: sh -c "sleep 9999" # pour se connecter la première fois sur le container backend et créer le projet django+app
+    volumes:
+      - ./backend:/empty-app/backend
+      #- /mnt/nfs/<path-to-nfs-dir>:/empty-app/<monut-point-in-container>
+
+    ports:
+      - "8000:8000"
+    # networks:
+    #   - DB
+  
+  celery:
+    build: ./backend
+    container_name: celery
+    env_file: .env_dev #to be commented if not using .env_dev file
+    # command: sh -c "sleep 9999" 
+    command: sh -c "cd /empty-app/backend/ ;celery -A myapp worker --autoscale 8 -l INFO"
+    depends_on:
+      - redis
+      - backend
+    volumes:
+      - ./backend:/empty-app/backend
+      #- /mnt/nfs/<path-to-nfs-dir>:/empty-app/<monut-point-in-container>
+    # networks:
+    #   - DB
+
+  celery-beat:
+    build: ./backend
+    container_name: celery-beat
+    env_file: .env_dev #to be commented if not using .env_dev file
+    command: sh -c "cd /empty-app/backend/ ; celery -A myapp beat -l INFO -S django --pidfile= --schedule=celerybeat-pidfile"
+    depends_on:
+      - redis
+      - backend
+    volumes:
+      - ./backend:/empty-app/backend
+      #- /mnt/nfs/<path-to-nfs-dir>:/empty-app/<monut-point-in-container>
+    # networks:
+    #   - DB
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    privileged: true
+    ports:
+      - '6379:6379'
+
+volumes:
+  dataset:
+#     driver: local
+# networks:
+#   DB:
+#     driver: bridge

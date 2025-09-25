@@ -1,0 +1,46 @@
+FROM python:3.13-alpine as builder
+
+RUN apk update &&\
+    apk add --no-cache --virtual .build-deps \
+    ca-certificates gcc postgresql-dev linux-headers musl-dev \
+    libffi-dev jpeg-dev zlib-dev bash git openssh graphviz-dev
+
+    
+RUN mkdir -p /empty-app/backend 
+COPY ./requirements/ /empty-app/backend/requirements/
+
+# RUN addgroup -S <group_name> -g 600 && adduser -S -u 991 <user_name> <group_name>
+
+
+# ENV PATH=/home/<user_name>/.local/bin:$PATH
+ENV PATH=/root/.local/bin:$PATH
+
+RUN pip install --user -r /empty-app/backend/requirements/development.txt
+# RUN pip install --user -r /empty-app/backend/requirements/base.txt
+
+# USER root
+
+# COPY docker_entrypoint.sh  /usr/local/bin
+# RUN chown <user_name>:<group_name>  /usr/local/bin/docker_entrypoint.sh
+# RUN chmod +x-w /usr/local/bin/docker_entrypoint.sh
+
+# COPY --from=builder /home/<user_name>/.local /home/<user_name>/.local
+
+
+# copy project files and folders to the current working directory (i.e. 'backend' folder)
+# COPY . /ap_v2/backend
+
+# RUN chown -R <user_name>:<group_name> /ap_v2/
+
+# WORKDIR /ap_v2/backend
+
+
+# USER <user_name>
+
+# ENV PATH=/home/<user_name>/.local/bin:$PATH
+# RUN chmod a+x docker_entrypoint.sh
+EXPOSE 8000
+
+# # Run entrypoint.sh
+# ENTRYPOINT [ "bash","docker_entrypoint.sh" ]
+CMD ["%%CMD%%"]
