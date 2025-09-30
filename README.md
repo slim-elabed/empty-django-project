@@ -14,14 +14,14 @@ connect to container postgres and launch these commands :
 
 - su - postgres
 - psql
-    
-    CREATE DATABASE myapp;
-    CREATE USER myapp_user WITH ENCRYPTED PASSWORD 'mypass';
-    GRANT ALL PRIVILEGES ON DATABASE myapp TO myapp_user;
-    
-    \c myapp;
-    GRANT USAGE, CREATE ON SCHEMA public TO myapp_user;
-    
+```sql
+CREATE DATABASE myapp;
+CREATE USER myapp_user WITH ENCRYPTED PASSWORD 'mypass';
+GRANT ALL PRIVILEGES ON DATABASE myapp TO myapp_user;
+
+\c myapp;
+GRANT USAGE, CREATE ON SCHEMA public TO myapp_user;
+```    
 modify backend command in docker-compose-dev.yml : comment sleep command
 run docker-compose.exe -f docker-compose-dev.yml up
 connect to backend container and run this command :
