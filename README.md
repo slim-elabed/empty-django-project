@@ -6,7 +6,7 @@ Run commands :
 
 - docker-compose.exe -f docker-compose-dev.yml build
 - docker-compose.exe -f docker-compose-dev.yml up
-    - celery and celer-beat containers will crash : needed code is not yet added, ignore it for the moment
+    - backend, celery and celer-beat containers will crash : needed code is not yet added, ignore it for the moment
 
 ## Initialise DB:
 
@@ -22,17 +22,36 @@ connect to container postgres and launch these commands :
     \c myapp;
     GRANT USAGE, CREATE ON SCHEMA public TO myapp_user;
     
+modify backend command in docker-compose-dev.yml : comment sleep command
+run docker-compose.exe -f docker-compose-dev.yml up
+connect to backend container and run this command :
 
+```bash
+django-admin startproject myapp backend
+```
+Edit settings.py : modify Database config
+```python
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "<db_name>",
+        "USER": "<django_dbuser>",
+        "PASSWORD": "<django_dbpasswd>",
+        "HOST": "Database",  # service name in docker-compose
+        "PORT": 5432,  # default postgres port
+    }
+}
+```
 connect to container backend and launch these commands :
 
 ```bash
 cd <path-to-django-project>
 
-python [manage.py](http://manage.py) migrate
+python manage.py migrate
 
-python [manage.py](http://manage.py) createsuperuser
+python manage.py createsuperuser
 
-python [manage.py](http://manage.py) runserver 0.0.0.0:8000
+python manage.py runserver 0.0.0.0:8000
 
 ```
 
@@ -44,15 +63,15 @@ modify docker_compose_dev.yml, backend command : comment sleep line and uncommen
 
 reconnect to backend container and create needed apps, example :
 
-- python [manage.py](http://manage.py/) startapp <my_app_name>
+- python manage.py startapp <my_app_name>
 - modify your model file, view, urls …
 - add app in site configfile (settings.py)
-- python [manage.py](http://manage.py/) makemigrations  <my_app_name>
-- python [manage.py](http://manage.py) migrate <my_app_name>
+- python manage.py makemigrations  <my_app_name>
+- python manage.py migrate <my_app_name>
 
 ## Add support of Celery and Celery Beat:
 
-create file [celery.py](http://celery.py) in project folder (like settings.py)
+create file celery.py in project folder (like settings.py)
 
 ```python
 import os
@@ -60,7 +79,7 @@ from celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'myapp.settings')
 
-app = Celery('myapp')
+app = Celery('myapp') # this is the folder name where you put your file celery.py
 app.config_from_object('django.conf:settings', namespace='CELERY')
 app.autodiscover_tasks()
 
